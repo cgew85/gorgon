@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
 @Document(collection = "movies")
-class Movie {
+public class Movie {
 
     public enum CASING {
         AMARAY,

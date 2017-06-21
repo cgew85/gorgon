@@ -1,15 +1,12 @@
 buildscript {
-	ext {
-		springBootVersion = '2.0.0.BUILD-SNAPSHOT'
-	}
-	repositories {
-		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.0.BUILD-SNAPSHOT")
+    }
 }
 
 apply plugin: 'java'
@@ -17,28 +14,25 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 
 jar {
-	baseName = 'gorgon'
-	version = '0.0.1-SNAPSHOT'
+    baseName = 'gorgon'
+    version = '0.0.1-SNAPSHOT'
 }
 
 sourceCompatibility = 1.8
 
 repositories {
-	mavenCentral()
-	maven { url "https://repo.spring.io/snapshot" }
-	maven { url "https://repo.spring.io/milestone" }
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
 }
 
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-	compile('com.vaadin:vaadin-spring-boot-starter')
-	compileOnly('org.projectlombok:lombok')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "com.vaadin:vaadin-bom:8.0.0"
-	}
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-mongodb', version: '1.5.4.RELEASE'
+    compile group: 'com.vaadin', name: 'vaadin-spring-boot-starter', version: '2.0.1'
+    compile group: 'com.vaadin', name: 'vaadin-client-compiled', version: '8.0.6'
+    compile group: 'com.vaadin', name: 'vaadin-server', version: '8.0.6'
+    compile group: 'com.vaadin', name: 'vaadin-themes', version: '8.0.6'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.4.RELEASE'
 }
