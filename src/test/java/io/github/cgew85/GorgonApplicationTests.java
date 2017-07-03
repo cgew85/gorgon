@@ -12,5 +12,4 @@ public class GorgonApplicationTests {
 	@Test
 	public void contextLoads() {
 	}
-
 }

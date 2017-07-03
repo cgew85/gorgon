@@ -1,6 +1,7 @@
 package io.github.cgew85;
 
 import com.vaadin.annotations.Theme;
+import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
@@ -9,7 +10,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
+import java.util.Objects;
 
 @SpringUI
 @Theme("valo")
@@ -20,7 +21,11 @@ public class MovieUI extends UI {
     private TextField textFieldName;
     private ComboBox<Movie.CUT> comboBoxCut;
     private ComboBox<Movie.CASING> comboBoxCasing;
+    private Button buttonAddMovie;
+    private Button buttonRemoveMovie;
     private Grid<Movie> grid;
+    private Label labelAppName;
+    private Label labelSeparator;
 
     @Autowired
     public MovieUI(MovieRepository movieRepository) {
@@ -32,53 +37,22 @@ public class MovieUI extends UI {
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
 
-        final Label label = new Label("Gorgon");
-        label.addStyleName(ValoTheme.LABEL_BOLD);
-        label.addStyleName(ValoTheme.LABEL_HUGE);
-        label.setSizeUndefined();
-
-        grid = new Grid<>(Movie.class);
-        grid.setItems(movieRepository.findAll());
-        grid.setWidth(100, Unit.PERCENTAGE);
-        grid.removeColumn("objectId");
-        grid.setColumnOrder("name", "cut", "casing");
-
-        verticalLayout.addComponents(label);
-        verticalLayout.addComponent(getAddMovieLine());
-        final Label labelSeparator = new Label("<hr />");
-        labelSeparator.setContentMode(ContentMode.HTML);
-        labelSeparator.setWidth(100, Unit.PERCENTAGE);
-        verticalLayout.addComponents(labelSeparator);
-        verticalLayout.addComponentsAndExpand(grid);
+        verticalLayout.addComponents(getLabelAppName(), getAddMovieLine(), getLabelSeparator());
+        verticalLayout.addComponentsAndExpand(getGrid());
+        verticalLayout.addComponent(getButtonRemoveMovie());
 
         setContent(verticalLayout);
     }
 
     private HorizontalLayout getAddMovieLine() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        textFieldName = new TextField("Name: ");
-
-        comboBoxCut = new ComboBox<>("Cut");
-        comboBoxCut.setItems(Movie.CUT.DIRECTORS_CUT, Movie.CUT.THEATRICAL_CUT);
-
-        comboBoxCasing = new ComboBox<>("Casing");
-        comboBoxCasing.setItems(Movie.CASING.AMARAY, Movie.CASING.STEELBOOK);
-
-        final Button buttonAddMovie = new Button();
-        buttonAddMovie.setIcon(FontAwesome.PLUS);
-        buttonAddMovie.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        buttonAddMovie.addClickListener(this::getClickListener);
-
-        horizontalLayout.addComponentsAndExpand(textFieldName);
-        horizontalLayout.addComponentsAndExpand(comboBoxCut);
-        horizontalLayout.addComponentsAndExpand(comboBoxCasing);
-        horizontalLayout.addComponentsAndExpand(buttonAddMovie);
+        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getButtonAddMovie());
         horizontalLayout.setComponentAlignment(buttonAddMovie, Alignment.BOTTOM_RIGHT);
 
         return horizontalLayout;
     }
 
-    private void getClickListener(Button.ClickEvent clickEvent) {
+    private void getClickListenerAdd(Button.ClickEvent clickEvent) {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty()) {
             Movie movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
@@ -89,10 +63,110 @@ public class MovieUI extends UI {
             textFieldName.clear();
             comboBoxCasing.clear();
             comboBoxCut.clear();
-            grid.setItems(Collections.EMPTY_LIST);
             grid.setItems(movieRepository.findAll());
         } else {
             Notification.show("Missing input", Notification.Type.WARNING_MESSAGE);
         }
+    }
+
+    private void getSelectionListener(SelectionEvent selectionEvent) {
+        if (selectionEvent.getAllSelectedItems().size() > 0) {
+            buttonRemoveMovie.setEnabled(true);
+        } else {
+            buttonRemoveMovie.setEnabled(false);
+        }
+    }
+
+    private void getClickListenerRemove(Button.ClickEvent clickEvent) {
+        if (grid.getSelectedItems().size() > 0) {
+            Movie selectedMovie = grid.getSelectedItems().stream().findFirst().orElse(null);
+            if (Objects.nonNull(selectedMovie)) {
+                movieRepository.delete(selectedMovie);
+                grid.setItems(movieRepository.findAll());
+            }
+        }
+    }
+
+    private TextField getTextFieldName() {
+        if (Objects.isNull(textFieldName)) {
+            textFieldName = new TextField("Name: ");
+        }
+
+        return textFieldName;
+    }
+
+    private ComboBox<Movie.CUT> getComboBoxCut() {
+        if (Objects.isNull(comboBoxCut)) {
+            comboBoxCut = new ComboBox<>("Cut");
+            comboBoxCut.setItems(Movie.CUT.DIRECTORS_CUT, Movie.CUT.THEATRICAL_CUT);
+        }
+
+        return comboBoxCut;
+    }
+
+    private ComboBox<Movie.CASING> getComboBoxCasing() {
+        if (Objects.isNull(comboBoxCasing)) {
+            comboBoxCasing = new ComboBox<>("Casing");
+            comboBoxCasing.setItems(Movie.CASING.AMARAY, Movie.CASING.STEELBOOK);
+        }
+
+        return comboBoxCasing;
+    }
+
+    private Button getButtonAddMovie() {
+        if (Objects.isNull(buttonAddMovie)) {
+            buttonAddMovie = new Button();
+            buttonAddMovie.setIcon(FontAwesome.PLUS);
+            buttonAddMovie.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+            buttonAddMovie.addClickListener(this::getClickListenerAdd);
+        }
+
+        return buttonAddMovie;
+    }
+
+    private Button getButtonRemoveMovie() {
+        if (Objects.isNull(buttonRemoveMovie)) {
+            buttonRemoveMovie = new Button();
+            buttonRemoveMovie.setIcon(FontAwesome.MINUS);
+            buttonRemoveMovie.addStyleName(ValoTheme.BUTTON_QUIET);
+            buttonRemoveMovie.setEnabled(false);
+            buttonRemoveMovie.addClickListener(this::getClickListenerRemove);
+        }
+
+        return buttonRemoveMovie;
+    }
+
+    private Grid<Movie> getGrid() {
+        if (Objects.isNull(grid)) {
+            grid = new Grid<>(Movie.class);
+            grid.setItems(movieRepository.findAll());
+            grid.setWidth(100, Unit.PERCENTAGE);
+            grid.removeColumn("objectId");
+            grid.setColumnOrder("name", "cut", "casing");
+            grid.addSelectionListener(this::getSelectionListener);
+        }
+
+        return grid;
+    }
+
+    private Label getLabelAppName() {
+        if (Objects.isNull(labelAppName)) {
+            labelAppName = new Label("Gorgon");
+            labelAppName.addStyleName(ValoTheme.LABEL_BOLD);
+            labelAppName.addStyleName(ValoTheme.LABEL_HUGE);
+            labelAppName.setSizeUndefined();
+        }
+
+        return labelAppName;
+    }
+
+    private Label getLabelSeparator() {
+        if (Objects.isNull(labelSeparator)) {
+            labelSeparator = new Label("<hr />");
+            labelSeparator.setContentMode(ContentMode.HTML);
+            labelSeparator.setWidth(100, Unit.PERCENTAGE);
+        }
+
+        return labelSeparator;
     }
 }
