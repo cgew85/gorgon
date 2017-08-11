@@ -10,7 +10,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Objects;
+import static java.util.Objects.isNull;
 
 @SpringUI
 @Theme("valo")
@@ -23,7 +23,7 @@ public class MovieUI extends UI {
     private ComboBox<Movie.CASING> comboBoxCasing;
     private Button buttonAddMovie;
     private Button buttonRemoveMovie;
-    private Grid<Movie> grid;
+    private Grid grid;
     private Label labelAppName;
     private Label labelSeparator;
 
@@ -77,18 +77,18 @@ public class MovieUI extends UI {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void getClickListenerRemove(Button.ClickEvent clickEvent) {
         if (grid.getSelectedItems().size() > 0) {
-            Movie selectedMovie = grid.getSelectedItems().stream().findFirst().orElse(null);
-            if (Objects.nonNull(selectedMovie)) {
-                movieRepository.delete(selectedMovie);
+            grid.getSelectedItems().stream().findFirst().ifPresent(movie -> {
+                movieRepository.delete((Movie) movie);
                 grid.setItems(movieRepository.findAll());
-            }
+            });
         }
     }
 
     private TextField getTextFieldName() {
-        if (Objects.isNull(textFieldName)) {
+        if (isNull(textFieldName)) {
             textFieldName = new TextField("Name: ");
         }
 
@@ -96,7 +96,7 @@ public class MovieUI extends UI {
     }
 
     private ComboBox<Movie.CUT> getComboBoxCut() {
-        if (Objects.isNull(comboBoxCut)) {
+        if (isNull(comboBoxCut)) {
             comboBoxCut = new ComboBox<>("Cut");
             comboBoxCut.setItems(Movie.CUT.DIRECTORS_CUT, Movie.CUT.THEATRICAL_CUT);
         }
@@ -105,7 +105,7 @@ public class MovieUI extends UI {
     }
 
     private ComboBox<Movie.CASING> getComboBoxCasing() {
-        if (Objects.isNull(comboBoxCasing)) {
+        if (isNull(comboBoxCasing)) {
             comboBoxCasing = new ComboBox<>("Casing");
             comboBoxCasing.setItems(Movie.CASING.AMARAY, Movie.CASING.STEELBOOK);
         }
@@ -114,7 +114,7 @@ public class MovieUI extends UI {
     }
 
     private Button getButtonAddMovie() {
-        if (Objects.isNull(buttonAddMovie)) {
+        if (isNull(buttonAddMovie)) {
             buttonAddMovie = new Button();
             buttonAddMovie.setIcon(FontAwesome.PLUS);
             buttonAddMovie.addStyleName(ValoTheme.BUTTON_FRIENDLY);
@@ -125,7 +125,7 @@ public class MovieUI extends UI {
     }
 
     private Button getButtonRemoveMovie() {
-        if (Objects.isNull(buttonRemoveMovie)) {
+        if (isNull(buttonRemoveMovie)) {
             buttonRemoveMovie = new Button();
             buttonRemoveMovie.setIcon(FontAwesome.MINUS);
             buttonRemoveMovie.addStyleName(ValoTheme.BUTTON_QUIET);
@@ -137,7 +137,7 @@ public class MovieUI extends UI {
     }
 
     private Grid<Movie> getGrid() {
-        if (Objects.isNull(grid)) {
+        if (isNull(grid)) {
             grid = new Grid<>(Movie.class);
             grid.setItems(movieRepository.findAll());
             grid.setWidth(100, Unit.PERCENTAGE);
@@ -150,7 +150,7 @@ public class MovieUI extends UI {
     }
 
     private Label getLabelAppName() {
-        if (Objects.isNull(labelAppName)) {
+        if (isNull(labelAppName)) {
             labelAppName = new Label("Gorgon");
             labelAppName.addStyleName(ValoTheme.LABEL_BOLD);
             labelAppName.addStyleName(ValoTheme.LABEL_HUGE);
@@ -161,7 +161,7 @@ public class MovieUI extends UI {
     }
 
     private Label getLabelSeparator() {
-        if (Objects.isNull(labelSeparator)) {
+        if (isNull(labelSeparator)) {
             labelSeparator = new Label("<hr />");
             labelSeparator.setContentMode(ContentMode.HTML);
             labelSeparator.setWidth(100, Unit.PERCENTAGE);
