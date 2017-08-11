@@ -1,7 +1,7 @@
 # Gorgon
 ### A small app to manage your movie collection
 
-This app uses a MongoDB hosted over at mlab.com. It runs on Java 8, Spring Boot and Gradle.
+This app uses a MongoDB hosted over at mlab.com. It runs on Java 8, Spring Boot and Maven.
 The UI is done in Vaadin 8.
 
 If you want to give it your own shot you need to change the settings in the application.properties file
