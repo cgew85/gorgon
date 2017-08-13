@@ -1,14 +1,19 @@
 package io.github.cgew85;
 
 import com.vaadin.annotations.Theme;
+import com.vaadin.data.HasValue;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 
@@ -21,11 +26,13 @@ public class MovieUI extends UI {
     private TextField textFieldName;
     private ComboBox<Movie.CUT> comboBoxCut;
     private ComboBox<Movie.CASING> comboBoxCasing;
+    private ComboBox<Movie.FORMAT> comboBoxFormat;
     private Button buttonAddMovie;
     private Button buttonRemoveMovie;
     private Grid grid;
     private Label labelAppName;
     private Label labelSeparator;
+    private Consumer<HasValue> clearInputField = HasValue::clear;
 
     @Autowired
     public MovieUI(MovieRepository movieRepository) {
@@ -46,24 +53,25 @@ public class MovieUI extends UI {
 
     private HorizontalLayout getAddMovieLine() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getButtonAddMovie());
+        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
         horizontalLayout.setComponentAlignment(buttonAddMovie, Alignment.BOTTOM_RIGHT);
 
         return horizontalLayout;
     }
 
+    @SuppressWarnings("unchecked")
     private void getClickListenerAdd(Button.ClickEvent clickEvent) {
-        if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty()) {
+        if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
             Movie movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
             movie.setCasing(comboBoxCasing.getValue());
             movie.setCut(comboBoxCut.getValue());
+            movie.setFormat(comboBoxFormat.getValue());
             movieRepository.save(movie);
 
-            textFieldName.clear();
-            comboBoxCasing.clear();
-            comboBoxCut.clear();
+            Stream.of(textFieldName, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
             grid.setItems(movieRepository.findAll());
+            grid.sort("name", SortDirection.ASCENDING);
         } else {
             Notification.show("Missing input", Notification.Type.WARNING_MESSAGE);
         }
@@ -113,6 +121,15 @@ public class MovieUI extends UI {
         return comboBoxCasing;
     }
 
+    private ComboBox<Movie.FORMAT> getComboBoxFormat() {
+        if (isNull(comboBoxFormat)) {
+            comboBoxFormat = new ComboBox<>("Format");
+            comboBoxFormat.setItems(Movie.FORMAT.BLURAY, Movie.FORMAT.DVD, Movie.FORMAT.VHS);
+        }
+
+        return comboBoxFormat;
+    }
+
     private Button getButtonAddMovie() {
         if (isNull(buttonAddMovie)) {
             buttonAddMovie = new Button();
@@ -136,14 +153,16 @@ public class MovieUI extends UI {
         return buttonRemoveMovie;
     }
 
+    @SuppressWarnings("unchecked")
     private Grid<Movie> getGrid() {
         if (isNull(grid)) {
             grid = new Grid<>(Movie.class);
             grid.setItems(movieRepository.findAll());
             grid.setWidth(100, Unit.PERCENTAGE);
             grid.removeColumn("objectId");
-            grid.setColumnOrder("name", "cut", "casing");
+            grid.setColumnOrder("name", "cut", "casing", "format");
             grid.addSelectionListener(this::getSelectionListener);
+            grid.sort("name", SortDirection.ASCENDING);
         }
 
         return grid;

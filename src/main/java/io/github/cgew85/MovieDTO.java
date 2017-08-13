@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 
 import java.io.Serializable;
 
+import static io.github.cgew85.Movie.*;
+
 /**
  * Created by cgew85 on 04.07.2017.
  */
@@ -23,9 +25,13 @@ public class MovieDTO implements Serializable {
 
     @Getter
     @Setter
-    private Movie.CASING casing;
+    private CASING casing;
 
     @Getter
     @Setter
-    private Movie.CUT cut;
+    private CUT cut;
+
+    @Getter
+    @Setter
+    private FORMAT format;
 }

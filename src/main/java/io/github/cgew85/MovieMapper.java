@@ -21,10 +21,12 @@ public class MovieMapper {
             return Optional.empty();
         } else {
             return Optional.of(
-                    new MovieDTO(movie.getObjectId(),
+                    new MovieDTO(
+                            movie.getObjectId(),
                             movie.getName(),
                             movie.getCasing(),
-                            movie.getCut())
+                            movie.getCut(),
+                            movie.getFormat())
             );
         }
     }

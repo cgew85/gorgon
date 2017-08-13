@@ -11,6 +11,12 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "movies")
 public class Movie {
 
+    public enum FORMAT {
+        DVD,
+        BLURAY,
+        VHS
+    }
+
     public enum CASING {
         AMARAY,
         STEELBOOK
@@ -32,4 +38,8 @@ public class Movie {
 
     @Field("CUT")
     private CUT cut;
+
+    @Field("FORMAT")
+    private FORMAT format;
+
 }
