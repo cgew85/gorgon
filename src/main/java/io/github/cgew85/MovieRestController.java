@@ -1,8 +1,7 @@
 package io.github.cgew85;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -23,13 +22,11 @@ public class MovieRestController {
         this.movieRepository = movieRepository;
     }
 
-    @RequestMapping(method = RequestMethod.GET,
-            value = "/movies",
-            produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/movies", produces = APPLICATION_JSON_VALUE)
     public List<MovieDTO> getAllMovies() {
         List<MovieDTO> movieDTOList = new ArrayList<>();
         MovieMapper movieMapper = new MovieMapper();
-        movieRepository.findAll().forEach(movie ->
+        movieRepository.findAll().parallelStream().forEach(movie ->
                 movieMapper.convertToDto(movie).ifPresent(movieDTOList::add));
 
         return movieDTOList;

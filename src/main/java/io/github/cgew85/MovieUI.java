@@ -32,7 +32,8 @@ public class MovieUI extends UI {
     private Grid grid;
     private Label labelAppName;
     private Label labelSeparator;
-    private Consumer<HasValue> clearInputField = HasValue::clear;
+    private final Consumer<HasValue> clearInputField = HasValue::clear;
+    private static final int FULL_WIDTH = 100;
 
     @Autowired
     public MovieUI(MovieRepository movieRepository) {
@@ -158,7 +159,7 @@ public class MovieUI extends UI {
         if (isNull(grid)) {
             grid = new Grid<>(Movie.class);
             grid.setItems(movieRepository.findAll());
-            grid.setWidth(100, Unit.PERCENTAGE);
+            grid.setWidth(FULL_WIDTH, Unit.PERCENTAGE);
             grid.removeColumn("objectId");
             grid.setColumnOrder("name", "cut", "casing", "format");
             grid.addSelectionListener(this::getSelectionListener);
@@ -183,7 +184,7 @@ public class MovieUI extends UI {
         if (isNull(labelSeparator)) {
             labelSeparator = new Label("<hr />");
             labelSeparator.setContentMode(ContentMode.HTML);
-            labelSeparator.setWidth(100, Unit.PERCENTAGE);
+            labelSeparator.setWidth(FULL_WIDTH, Unit.PERCENTAGE);
         }
 
         return labelSeparator;
