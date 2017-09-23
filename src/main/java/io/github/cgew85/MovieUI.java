@@ -5,7 +5,6 @@ import com.vaadin.data.HasValue;
 import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
@@ -15,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.vaadin.shared.data.sort.SortDirection.ASCENDING;
+import static com.vaadin.ui.Alignment.BOTTOM_RIGHT;
+import static com.vaadin.ui.Notification.Type.WARNING_MESSAGE;
 import static java.util.Objects.isNull;
 
 @SpringUI
@@ -55,7 +57,7 @@ public class MovieUI extends UI {
     private HorizontalLayout getAddMovieLine() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
-        horizontalLayout.setComponentAlignment(buttonAddMovie, Alignment.BOTTOM_RIGHT);
+        horizontalLayout.setComponentAlignment(buttonAddMovie, BOTTOM_RIGHT);
 
         return horizontalLayout;
     }
@@ -72,9 +74,9 @@ public class MovieUI extends UI {
 
             Stream.of(textFieldName, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
             grid.setItems(movieRepository.findAll());
-            grid.sort("name", SortDirection.ASCENDING);
+            grid.sort("name", ASCENDING);
         } else {
-            Notification.show("Missing input", Notification.Type.WARNING_MESSAGE);
+            Notification.show("Missing input", WARNING_MESSAGE);
         }
     }
 
@@ -163,7 +165,7 @@ public class MovieUI extends UI {
             grid.removeColumn("objectId");
             grid.setColumnOrder("name", "cut", "casing", "format");
             grid.addSelectionListener(this::getSelectionListener);
-            grid.sort("name", SortDirection.ASCENDING);
+            grid.sort("name", ASCENDING);
         }
 
         return grid;
