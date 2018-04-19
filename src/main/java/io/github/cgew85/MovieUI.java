@@ -81,7 +81,7 @@ public class MovieUI extends UI {
     }
 
     private void getSelectionListener(SelectionEvent selectionEvent) {
-        if (selectionEvent.getAllSelectedItems().size() > 0) {
+        if (!selectionEvent.getAllSelectedItems().isEmpty()) {
             buttonRemoveMovie.setEnabled(true);
         } else {
             buttonRemoveMovie.setEnabled(false);
@@ -90,7 +90,7 @@ public class MovieUI extends UI {
 
     @SuppressWarnings("unchecked")
     private void getClickListenerRemove(Button.ClickEvent clickEvent) {
-        if (grid.getSelectedItems().size() > 0) {
+        if (!grid.getSelectedItems().isEmpty()) {
             grid.getSelectedItems().stream().findFirst().ifPresent(movie -> {
                 movieRepository.delete((Movie) movie);
                 grid.setItems(movieRepository.findAll());
