@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/cgew85/Gorgon/branch/master/graph/badge.svg)](https://codecov.io/gh/cgew85/Gorgon)
+[![Build Status](https://travis-ci.org/cgew85/Gorgon.svg?branch=master)](https://travis-ci.org/cgew85/Gorgon)
 # Gorgon
 ### A small app to manage your movie collection
 
