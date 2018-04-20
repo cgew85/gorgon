@@ -9,6 +9,7 @@ import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Consumer;
@@ -44,7 +45,7 @@ public class MovieUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        final VerticalLayout verticalLayout = new VerticalLayout();
+        val verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
 
         verticalLayout.addComponents(getLabelAppName(), getAddMovieLine(), getLabelSeparator());
@@ -55,7 +56,7 @@ public class MovieUI extends UI {
     }
 
     private HorizontalLayout getAddMovieLine() {
-        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        val horizontalLayout = new HorizontalLayout();
         horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
         horizontalLayout.setComponentAlignment(buttonAddMovie, BOTTOM_RIGHT);
 
@@ -65,7 +66,7 @@ public class MovieUI extends UI {
     @SuppressWarnings("unchecked")
     private void getClickListenerAdd(Button.ClickEvent clickEvent) {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
-            Movie movie = new Movie();
+            final Movie movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
             movie.setCasing(comboBoxCasing.getValue());
             movie.setCut(comboBoxCut.getValue());
