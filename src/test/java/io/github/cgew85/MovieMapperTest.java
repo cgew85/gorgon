@@ -5,8 +5,8 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 /**
  * Created by cgew85 on 20.04.2018.
@@ -36,9 +36,9 @@ public class MovieMapperTest {
         Optional<MovieDTO> optionalMovieDTO = movieMapper.convertToDto(movie);
         assertTrue(optionalMovieDTO.isPresent());
         MovieDTO movieDTO = optionalMovieDTO.get();
-        assertEquals(movie.getName(), movieDTO.getName());
-        assertEquals(movie.getCasing(), movieDTO.getCasing());
-        assertEquals(movie.getCut(), movieDTO.getCut());
-        assertEquals(movie.getFormat(), movieDTO.getFormat());
+        assertThat(movieDTO.getName(), is(movie.getName()));
+        assertThat(movieDTO.getCasing(), is(movie.getCasing()));
+        assertThat(movieDTO.getCut(), is(movie.getCut()));
+        assertThat(movieDTO.getFormat(), is(movie.getFormat()));
     }
 }
