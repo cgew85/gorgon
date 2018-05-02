@@ -66,7 +66,7 @@ public class MovieUI extends UI {
     @SuppressWarnings("unchecked")
     private void getClickListenerAdd(Button.ClickEvent clickEvent) {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
-            final Movie movie = new Movie();
+            val movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
             movie.setCasing(comboBoxCasing.getValue());
             movie.setCut(comboBoxCut.getValue());

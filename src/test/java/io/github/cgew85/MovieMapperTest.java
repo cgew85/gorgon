@@ -1,5 +1,6 @@
 package io.github.cgew85;
 
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,15 +28,15 @@ public class MovieMapperTest {
 
     @Test
     public void testMappingWithValidInput() {
-        Movie movie = new Movie();
+        val movie = new Movie();
         movie.setObjectId(null);
         movie.setName("name");
         movie.setCasing(Movie.CASING.AMARAY);
         movie.setCut(Movie.CUT.THEATRICAL_CUT);
         movie.setFormat(Movie.FORMAT.BLURAY);
-        Optional<MovieDTO> optionalMovieDTO = movieMapper.convertToDto(movie);
+        val optionalMovieDTO = movieMapper.convertToDto(movie);
         assertTrue(optionalMovieDTO.isPresent());
-        MovieDTO movieDTO = optionalMovieDTO.get();
+        val movieDTO = optionalMovieDTO.get();
         assertThat(movieDTO.getName(), is(movie.getName()));
         assertThat(movieDTO.getCasing(), is(movie.getCasing()));
         assertThat(movieDTO.getCut(), is(movie.getCut()));
