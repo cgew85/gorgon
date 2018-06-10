@@ -26,6 +26,7 @@
         <lombok.version>1.16.20</lombok.version>
         <spring-boot-test.version>1.4.2.RELEASE</spring-boot-test.version>
         <hamcrest-junit.version>2.0.0.0</hamcrest-junit.version>
+        <mockito.version>2.18.3</mockito.version>
     </properties>
 
     <dependencies>
@@ -65,6 +66,11 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-junit</artifactId>
             <version>${hamcrest-junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
         </dependency>
     </dependencies>
 
