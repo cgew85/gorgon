@@ -1,37 +1,25 @@
-package io.github.cgew85;
+package io.github.cgew85.domain;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 import org.bson.types.ObjectId;
 
 import java.io.Serializable;
 
-import static io.github.cgew85.Movie.*;
+import static io.github.cgew85.domain.Movie.*;
 
 /**
  * Created by cgew85 on 04.07.2017.
  */
 @AllArgsConstructor
+@Builder
+@Data
 public class MovieDTO implements Serializable {
 
-    @Getter
-    @Setter
     private ObjectId objectId;
-
-    @Getter
-    @Setter
     private String name;
-
-    @Getter
-    @Setter
     private CASING casing;
-
-    @Getter
-    @Setter
     private CUT cut;
-
-    @Getter
-    @Setter
     private FORMAT format;
 }

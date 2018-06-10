@@ -1,4 +1,4 @@
-package io.github.cgew85;
+package io.github.cgew85.ui;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.HasValue;
@@ -9,9 +9,13 @@ import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import io.github.cgew85.domain.Movie;
+import io.github.cgew85.mapper.MovieMapper;
+import io.github.cgew85.service.MovieService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -24,12 +28,13 @@ import static java.util.Objects.isNull;
 @Theme("valo")
 public class MovieUI extends UI {
 
-    private final MovieRepository movieRepository;
+    private final MovieService movieService;
+    private final MovieMapper movieMapper;
 
     private TextField textFieldName;
-    private ComboBox<Movie.CUT> comboBoxCut;
-    private ComboBox<Movie.CASING> comboBoxCasing;
-    private ComboBox<Movie.FORMAT> comboBoxFormat;
+    private ComboBox<String> comboBoxCut;
+    private ComboBox<String> comboBoxCasing;
+    private ComboBox<String> comboBoxFormat;
     private Button buttonAddMovie;
     private Button buttonRemoveMovie;
     private Grid grid;
@@ -39,8 +44,9 @@ public class MovieUI extends UI {
     private static final int FULL_WIDTH = 100;
 
     @Autowired
-    public MovieUI(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
+    public MovieUI(MovieService movieService, MovieMapper movieMapper) {
+        this.movieService = movieService;
+        this.movieMapper = movieMapper;
     }
 
     @Override
@@ -68,13 +74,13 @@ public class MovieUI extends UI {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
             val movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
-            movie.setCasing(comboBoxCasing.getValue());
-            movie.setCut(comboBoxCut.getValue());
-            movie.setFormat(comboBoxFormat.getValue());
-            movieRepository.save(movie);
+            movie.setCasing((Movie.CASING) movieMapper.mapCutCasingOrFormat(comboBoxCasing.getValue(), Movie.CASING.class));
+            movie.setCut((Movie.CUT) movieMapper.mapCutCasingOrFormat(comboBoxCut.getValue(), Movie.CUT.class));
+            movie.setFormat((Movie.FORMAT) movieMapper.mapCutCasingOrFormat(comboBoxFormat.getValue(), Movie.FORMAT.class));
+            movieService.saveMovie(movie);
 
             Stream.of(textFieldName, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
-            grid.setItems(movieRepository.findAll());
+            grid.setItems(getAllMovies());
             grid.sort("name", ASCENDING);
         } else {
             Notification.show("Missing input", WARNING_MESSAGE);
@@ -93,8 +99,8 @@ public class MovieUI extends UI {
     private void getClickListenerRemove(Button.ClickEvent clickEvent) {
         if (!grid.getSelectedItems().isEmpty()) {
             grid.getSelectedItems().stream().findFirst().ifPresent(movie -> {
-                movieRepository.delete((Movie) movie);
-                grid.setItems(movieRepository.findAll());
+                movieService.deleteMovie((Movie) movie);
+                grid.setItems(getAllMovies());
             });
         }
     }
@@ -107,28 +113,28 @@ public class MovieUI extends UI {
         return textFieldName;
     }
 
-    private ComboBox<Movie.CUT> getComboBoxCut() {
+    private ComboBox<String> getComboBoxCut() {
         if (isNull(comboBoxCut)) {
             comboBoxCut = new ComboBox<>("Cut");
-            comboBoxCut.setItems(Movie.CUT.DIRECTORS_CUT, Movie.CUT.THEATRICAL_CUT);
+            comboBoxCut.setItems(movieMapper.getMapCutUiTexts().stream().sorted());
         }
 
         return comboBoxCut;
     }
 
-    private ComboBox<Movie.CASING> getComboBoxCasing() {
+    private ComboBox<String> getComboBoxCasing() {
         if (isNull(comboBoxCasing)) {
             comboBoxCasing = new ComboBox<>("Casing");
-            comboBoxCasing.setItems(Movie.CASING.AMARAY, Movie.CASING.STEELBOOK);
+            comboBoxCasing.setItems(movieMapper.getMapCasingUiTexts().stream().sorted());
         }
 
         return comboBoxCasing;
     }
 
-    private ComboBox<Movie.FORMAT> getComboBoxFormat() {
+    private ComboBox<String> getComboBoxFormat() {
         if (isNull(comboBoxFormat)) {
             comboBoxFormat = new ComboBox<>("Format");
-            comboBoxFormat.setItems(Movie.FORMAT.BLURAY, Movie.FORMAT.DVD, Movie.FORMAT.VHS);
+            comboBoxFormat.setItems(movieMapper.getMapFormatUiTexts().stream().sorted());
         }
 
         return comboBoxFormat;
@@ -161,10 +167,16 @@ public class MovieUI extends UI {
     private Grid<Movie> getGrid() {
         if (isNull(grid)) {
             grid = new Grid<>(Movie.class);
-            grid.setItems(movieRepository.findAll());
+            grid.setItems(getAllMovies());
             grid.setWidth(FULL_WIDTH, Unit.PERCENTAGE);
             grid.removeColumn("objectId");
-            grid.setColumnOrder("name", "cut", "casing", "format");
+            grid.removeColumn("cut");
+            grid.removeColumn("casing");
+            grid.removeColumn("format");
+            grid.getColumn("casingUi").setCaption("Casing");
+            grid.getColumn("cutUi").setCaption("Cut");
+            grid.getColumn("formatUi").setCaption("Format");
+            grid.setColumnOrder("name", "cutUi", "casingUi", "formatUi");
             grid.addSelectionListener(this::getSelectionListener);
             grid.sort("name", ASCENDING);
         }
@@ -191,5 +203,16 @@ public class MovieUI extends UI {
         }
 
         return labelSeparator;
+    }
+
+    private List<Movie> getAllMovies() {
+        List<Movie> movies = movieService.getAllMovies();
+        movies.forEach(movie -> {
+            movie.setCasingUi(movieMapper.getUiTextCasing(movie.getCasing()));
+            movie.setCutUi(movieMapper.getUiTextCut(movie.getCut()));
+            movie.setFormatUi(movieMapper.getUiTextFormat(movie.getFormat()));
+        });
+
+        return movies;
     }
 }

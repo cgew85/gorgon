@@ -1,5 +1,7 @@
 package io.github.cgew85;
 
+import io.github.cgew85.domain.Movie;
+import io.github.cgew85.mapper.MovieMapper;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;

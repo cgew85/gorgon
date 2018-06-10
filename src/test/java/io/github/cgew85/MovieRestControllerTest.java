@@ -1,5 +1,8 @@
 package io.github.cgew85;
 
+import io.github.cgew85.controller.MovieRestController;
+import io.github.cgew85.mapper.MovieMapper;
+import io.github.cgew85.service.MovieService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,9 +23,10 @@ public class MovieRestControllerTest {
 
     @Before
     public void setUp() {
-        MovieRepository movieRepository = mock(MovieRepository.class);
-        when(movieRepository.findAll()).thenReturn(Collections.emptyList());
-        movieRestController = new MovieRestController(movieRepository);
+        MovieMapper movieMapper = mock(MovieMapper.class);
+        MovieService movieService = mock(MovieService.class);
+        when(movieService.getAllMovies()).thenReturn(Collections.emptyList());
+        movieRestController = new MovieRestController(movieService, movieMapper);
     }
 
     @Test
