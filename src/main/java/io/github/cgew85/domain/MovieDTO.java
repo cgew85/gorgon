@@ -22,4 +22,5 @@ public class MovieDTO implements Serializable {
     private CASING casing;
     private CUT cut;
     private FORMAT format;
+    private int releaseYear;
 }

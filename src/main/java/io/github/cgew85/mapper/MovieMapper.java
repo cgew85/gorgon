@@ -37,6 +37,7 @@ public class MovieMapper {
                             .cut(movie.getCut())
                             .format(movie.getFormat())
                             .name(movie.getName())
+                            .releaseYear(movie.getReleaseYear())
                             .objectId(movie.getObjectId())
                             .build());
         }

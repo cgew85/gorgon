@@ -52,6 +52,9 @@ public class Movie {
     @Field("FORMAT")
     private FORMAT format;
 
+    @Field("RELEASE_YEAR")
+    private int releaseYear;
+
     @Transient
     private String formatUi;
 }

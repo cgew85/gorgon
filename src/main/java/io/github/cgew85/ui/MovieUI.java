@@ -32,6 +32,7 @@ public class MovieUI extends UI {
     private final MovieMapper movieMapper;
 
     private TextField textFieldName;
+    private TextField textFieldReleaseYear;
     private ComboBox<String> comboBoxCut;
     private ComboBox<String> comboBoxCasing;
     private ComboBox<String> comboBoxFormat;
@@ -63,7 +64,7 @@ public class MovieUI extends UI {
 
     private HorizontalLayout getAddMovieLine() {
         val horizontalLayout = new HorizontalLayout();
-        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
+        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getTextFieldReleaseYear(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
         horizontalLayout.setComponentAlignment(buttonAddMovie, BOTTOM_RIGHT);
 
         return horizontalLayout;
@@ -74,12 +75,13 @@ public class MovieUI extends UI {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
             val movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
+            movie.setReleaseYear(Integer.parseInt(textFieldReleaseYear.getValue().trim()));
             movie.setCasing((Movie.CASING) movieMapper.mapCutCasingOrFormat(comboBoxCasing.getValue(), Movie.CASING.class));
             movie.setCut((Movie.CUT) movieMapper.mapCutCasingOrFormat(comboBoxCut.getValue(), Movie.CUT.class));
             movie.setFormat((Movie.FORMAT) movieMapper.mapCutCasingOrFormat(comboBoxFormat.getValue(), Movie.FORMAT.class));
             movieService.saveMovie(movie);
 
-            Stream.of(textFieldName, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
+            Stream.of(textFieldName, textFieldReleaseYear, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
             grid.setItems(getAllMovies());
             grid.sort("name", ASCENDING);
         } else {
@@ -111,6 +113,13 @@ public class MovieUI extends UI {
         }
 
         return textFieldName;
+    }
+
+    public TextField getTextFieldReleaseYear() {
+        if (isNull(textFieldReleaseYear)) {
+            textFieldReleaseYear = new TextField("Release year:");
+        }
+        return textFieldReleaseYear;
     }
 
     private ComboBox<String> getComboBoxCut() {
@@ -173,10 +182,11 @@ public class MovieUI extends UI {
             grid.removeColumn("cut");
             grid.removeColumn("casing");
             grid.removeColumn("format");
+            grid.getColumn("releaseYear").setCaption("Release Year");
             grid.getColumn("casingUi").setCaption("Casing");
             grid.getColumn("cutUi").setCaption("Cut");
             grid.getColumn("formatUi").setCaption("Format");
-            grid.setColumnOrder("name", "cutUi", "casingUi", "formatUi");
+            grid.setColumnOrder("name", "releaseYear", "cutUi", "casingUi", "formatUi");
             grid.addSelectionListener(this::getSelectionListener);
             grid.sort("name", ASCENDING);
         }
