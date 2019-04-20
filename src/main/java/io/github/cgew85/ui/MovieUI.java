@@ -1,32 +1,41 @@
 package io.github.cgew85.ui;
 
-import com.vaadin.annotations.Theme;
-import com.vaadin.data.HasValue;
-import com.vaadin.event.selection.SelectionEvent;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.material.Material;
 import io.github.cgew85.domain.Movie;
 import io.github.cgew85.mapper.MovieMapper;
 import io.github.cgew85.service.MovieService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.vaadin.shared.data.sort.SortDirection.ASCENDING;
-import static com.vaadin.ui.Alignment.BOTTOM_RIGHT;
-import static com.vaadin.ui.Notification.Type.WARNING_MESSAGE;
 import static java.util.Objects.isNull;
 
-@SpringUI
-@Theme("valo")
-public class MovieUI extends UI {
+@Route("")
+@Theme(value = Lumo.class, variant = Material.LIGHT)
+public class MovieUI extends VerticalLayout {
 
     private final MovieService movieService;
     private final MovieMapper movieMapper;
@@ -42,36 +51,30 @@ public class MovieUI extends UI {
     private Label labelAppName;
     private Label labelSeparator;
     private final Consumer<HasValue> clearInputField = HasValue::clear;
-    private static final int FULL_WIDTH = 100;
 
     @Autowired
     public MovieUI(MovieService movieService, MovieMapper movieMapper) {
         this.movieService = movieService;
         this.movieMapper = movieMapper;
+        init();
     }
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        val verticalLayout = new VerticalLayout();
-        verticalLayout.setSizeFull();
-
-        verticalLayout.addComponents(getLabelAppName(), getAddMovieLine(), getLabelSeparator());
-        verticalLayout.addComponentsAndExpand(getGrid());
-        verticalLayout.addComponent(getButtonRemoveMovie());
-
-        setContent(verticalLayout);
+    protected void init() {
+        this.setSizeFull();
+        this.add(getLabelAppName(), getAddMovieLine(), getLabelSeparator(), getGrid(), getButtonRemoveMovie());
     }
 
     private HorizontalLayout getAddMovieLine() {
         val horizontalLayout = new HorizontalLayout();
-        horizontalLayout.addComponentsAndExpand(getTextFieldName(), getTextFieldReleaseYear(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
-        horizontalLayout.setComponentAlignment(buttonAddMovie, BOTTOM_RIGHT);
+
+        horizontalLayout.add(getTextFieldName(), getTextFieldReleaseYear(), getComboBoxCut(), getComboBoxCasing(), getComboBoxFormat(), getButtonAddMovie());
+        horizontalLayout.setWidthFull();
 
         return horizontalLayout;
     }
 
     @SuppressWarnings("unchecked")
-    private void getClickListenerAdd(Button.ClickEvent clickEvent) {
+    private void getClickListenerAdd(ClickEvent clickEvent) {
         if (!textFieldName.isEmpty() && !comboBoxCut.isEmpty() && !comboBoxCasing.isEmpty() && !comboBoxFormat.isEmpty()) {
             val movie = new Movie();
             movie.setName(textFieldName.getValue().trim());
@@ -83,9 +86,9 @@ public class MovieUI extends UI {
 
             Stream.of(textFieldName, textFieldReleaseYear, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
             grid.setItems(getAllMovies());
-            grid.sort("name", ASCENDING);
+            grid.sort(Collections.singletonList(new GridSortOrder<String>(grid.getColumnByKey("name"), SortDirection.ASCENDING)));
         } else {
-            Notification.show("Missing input", WARNING_MESSAGE);
+            Notification.show("Missing input");
         }
     }
 
@@ -98,7 +101,7 @@ public class MovieUI extends UI {
     }
 
     @SuppressWarnings("unchecked")
-    private void getClickListenerRemove(Button.ClickEvent clickEvent) {
+    private void getClickListenerRemove(ClickEvent clickEvent) {
         if (!grid.getSelectedItems().isEmpty()) {
             grid.getSelectedItems().stream().findFirst().ifPresent(movie -> {
                 movieService.deleteMovie((Movie) movie);
@@ -152,8 +155,8 @@ public class MovieUI extends UI {
     private Button getButtonAddMovie() {
         if (isNull(buttonAddMovie)) {
             buttonAddMovie = new Button();
-            buttonAddMovie.setIcon(FontAwesome.PLUS);
-            buttonAddMovie.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+            buttonAddMovie.setIcon(VaadinIcon.PLUS.create());
+            buttonAddMovie.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_LARGE);
             buttonAddMovie.addClickListener(this::getClickListenerAdd);
         }
 
@@ -163,8 +166,7 @@ public class MovieUI extends UI {
     private Button getButtonRemoveMovie() {
         if (isNull(buttonRemoveMovie)) {
             buttonRemoveMovie = new Button();
-            buttonRemoveMovie.setIcon(FontAwesome.MINUS);
-            buttonRemoveMovie.addStyleName(ValoTheme.BUTTON_QUIET);
+            buttonRemoveMovie.setIcon(VaadinIcon.MINUS.create());
             buttonRemoveMovie.setEnabled(false);
             buttonRemoveMovie.addClickListener(this::getClickListenerRemove);
         }
@@ -177,18 +179,19 @@ public class MovieUI extends UI {
         if (isNull(grid)) {
             grid = new Grid<>(Movie.class);
             grid.setItems(getAllMovies());
-            grid.setWidth(FULL_WIDTH, Unit.PERCENTAGE);
-            grid.removeColumn("objectId");
-            grid.removeColumn("cut");
-            grid.removeColumn("casing");
-            grid.removeColumn("format");
-            grid.getColumn("releaseYear").setCaption("Release Year");
-            grid.getColumn("casingUi").setCaption("Casing");
-            grid.getColumn("cutUi").setCaption("Cut");
-            grid.getColumn("formatUi").setCaption("Format");
-            grid.setColumnOrder("name", "releaseYear", "cutUi", "casingUi", "formatUi");
+            grid.setWidthFull();
+            grid.removeColumn(grid.getColumnByKey("objectId"));
+            grid.removeColumn(grid.getColumnByKey("cut"));
+            grid.removeColumn(grid.getColumnByKey("casing"));
+            grid.removeColumn(grid.getColumnByKey("format"));
+            grid.getColumnByKey("casingUi").setHeader("Casing");
+            grid.getColumnByKey("cutUi").setHeader("Cut");
+            grid.getColumnByKey("formatUi").setHeader("Format");
+            grid.setColumns("name", "releaseYear", "cutUi", "formatUi", "casingUi");
+            grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                    GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             grid.addSelectionListener(this::getSelectionListener);
-            grid.sort("name", ASCENDING);
+            grid.sort(Collections.singletonList(new GridSortOrder<String>(grid.getColumnByKey("name"), SortDirection.ASCENDING)));
         }
 
         return grid;
@@ -197,8 +200,8 @@ public class MovieUI extends UI {
     private Label getLabelAppName() {
         if (isNull(labelAppName)) {
             labelAppName = new Label("Gorgon");
-            labelAppName.addStyleName(ValoTheme.LABEL_BOLD);
-            labelAppName.addStyleName(ValoTheme.LABEL_HUGE);
+//            labelAppName.addStyleName(ValoTheme.LABEL_BOLD);
+//            labelAppName.addStyleName(ValoTheme.LABEL_HUGE);
             labelAppName.setSizeUndefined();
         }
 
@@ -207,9 +210,8 @@ public class MovieUI extends UI {
 
     private Label getLabelSeparator() {
         if (isNull(labelSeparator)) {
-            labelSeparator = new Label("<hr />");
-            labelSeparator.setContentMode(ContentMode.HTML);
-            labelSeparator.setWidth(FULL_WIDTH, Unit.PERCENTAGE);
+            labelSeparator = new Label("");
+            labelSeparator.setWidthFull();
         }
 
         return labelSeparator;
