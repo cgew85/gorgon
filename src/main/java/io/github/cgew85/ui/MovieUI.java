@@ -200,8 +200,6 @@ public class MovieUI extends VerticalLayout {
     private Label getLabelAppName() {
         if (isNull(labelAppName)) {
             labelAppName = new Label("Gorgon");
-//            labelAppName.addStyleName(ValoTheme.LABEL_BOLD);
-//            labelAppName.addStyleName(ValoTheme.LABEL_HUGE);
             labelAppName.setSizeUndefined();
         }
 
