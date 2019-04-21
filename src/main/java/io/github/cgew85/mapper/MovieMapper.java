@@ -1,18 +1,14 @@
 package io.github.cgew85.mapper;
 
 import io.github.cgew85.domain.Movie;
-import io.github.cgew85.domain.MovieDTO;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static java.util.Objects.isNull;
 
 /**
  * Created by cgew85 on 04.07.2017.
@@ -25,23 +21,6 @@ public class MovieMapper {
     private Map<String, Movie.CUT> mapCut = new HashMap<>();
     private Map<String, Movie.CASING> mapCasing = new HashMap<>();
     private Map<String, Movie.FORMAT> mapFormat = new HashMap<>();
-
-    public Optional<MovieDTO> convertToDto(final Movie movie) {
-        if (isNull(movie)) {
-            log.error("Movie cannot be null.");
-            return Optional.empty();
-        } else {
-            return Optional.of(
-                    MovieDTO.builder()
-                            .casing(movie.getCasing())
-                            .cut(movie.getCut())
-                            .format(movie.getFormat())
-                            .name(movie.getName())
-                            .releaseYear(movie.getReleaseYear())
-                            .objectId(movie.getObjectId())
-                            .build());
-        }
-    }
 
     public Set<String> getMapCutUiTexts() {
         if (mapCut.isEmpty()) initMapCut();

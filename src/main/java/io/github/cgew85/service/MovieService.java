@@ -1,5 +1,11 @@
 package io.github.cgew85.service;
 
+import feign.Feign;
+import feign.Logger;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import feign.okhttp.OkHttpClient;
+import feign.slf4j.Slf4jLogger;
 import io.github.cgew85.domain.Movie;
 import io.github.cgew85.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +21,12 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class MovieService {
 
+    private final OmdbService omdbService;
     private final MovieRepository movieRepository;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(OmdbService omdbService, MovieRepository movieRepository) {
+        this.omdbService = omdbService;
         this.movieRepository = movieRepository;
     }
 
@@ -34,5 +42,15 @@ public class MovieService {
     public void deleteMovie(Movie movie) {
         requireNonNull(movie, "movie cannot be null");
         movieRepository.delete(movie);
+    }
+
+    private OmdbClient prepareOmdbClient() {
+        return Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new JacksonEncoder())
+                .decoder(new JacksonDecoder())
+                .logger(new Slf4jLogger(OmdbClient.class))
+                .logLevel(Logger.Level.FULL)
+                .target(OmdbClient.class, "http://www.omdbapi.com");
     }
 }
