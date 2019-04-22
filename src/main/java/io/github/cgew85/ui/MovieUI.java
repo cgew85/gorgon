@@ -1,13 +1,18 @@
 package io.github.cgew85.ui;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -21,6 +26,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.material.Material;
 import io.github.cgew85.domain.Movie;
+import io.github.cgew85.domain.OmdbItem;
 import io.github.cgew85.mapper.MovieMapper;
 import io.github.cgew85.service.MovieService;
 import lombok.val;
@@ -59,7 +65,7 @@ public class MovieUI extends VerticalLayout {
         init();
     }
 
-    protected void init() {
+    private void init() {
         this.setSizeFull();
         this.add(getLabelAppName(), getAddMovieLine(), getLabelSeparator(), getGrid(), getButtonRemoveMovie());
     }
@@ -83,7 +89,6 @@ public class MovieUI extends VerticalLayout {
             movie.setCut((Movie.CUT) movieMapper.mapCutCasingOrFormat(comboBoxCut.getValue(), Movie.CUT.class));
             movie.setFormat((Movie.FORMAT) movieMapper.mapCutCasingOrFormat(comboBoxFormat.getValue(), Movie.FORMAT.class));
             movieService.saveMovie(movie);
-
             Stream.of(textFieldName, textFieldReleaseYear, comboBoxCasing, comboBoxCut, comboBoxFormat).forEach(clearInputField);
             grid.setItems(getAllMovies());
             grid.sort(Collections.singletonList(new GridSortOrder<String>(grid.getColumnByKey("name"), SortDirection.ASCENDING)));
@@ -184,17 +189,50 @@ public class MovieUI extends VerticalLayout {
             grid.removeColumn(grid.getColumnByKey("cut"));
             grid.removeColumn(grid.getColumnByKey("casing"));
             grid.removeColumn(grid.getColumnByKey("format"));
+            grid.setColumns("name", "releaseYear", "cutUi", "formatUi", "casingUi");
             grid.getColumnByKey("casingUi").setHeader("Casing");
             grid.getColumnByKey("cutUi").setHeader("Cut");
             grid.getColumnByKey("formatUi").setHeader("Format");
-            grid.setColumns("name", "releaseYear", "cutUi", "formatUi", "casingUi");
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             grid.addSelectionListener(this::getSelectionListener);
+            grid.addItemDoubleClickListener(this::getDoubleClickListener);
             grid.sort(Collections.singletonList(new GridSortOrder<String>(grid.getColumnByKey("name"), SortDirection.ASCENDING)));
         }
 
         return grid;
+    }
+
+    private void getDoubleClickListener(ComponentEvent event) {
+        ItemDoubleClickEvent itemDoubleClickEvent = (ItemDoubleClickEvent) event;
+        final Movie movie = (Movie) itemDoubleClickEvent.getItem();
+        OmdbItem omdbItem = movieService.getOmdbItemByNameAndYear(movie.getName(), String.valueOf(movie.getReleaseYear()));
+        if (isNull(omdbItem.getTitle())) {
+            Notification.show("Cannot fetch omdb information for: " + movie.getName());
+        } else {
+            getDialogLayout(omdbItem).open();
+        }
+
+    }
+
+    private Dialog getDialogLayout(OmdbItem omdbItem) {
+        Dialog dialog = new Dialog();
+        dialog.setWidth("800px");
+        dialog.setHeight("600px");
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        VerticalLayout verticalLayoutLeft = new VerticalLayout();
+        VerticalLayout verticalLayoutRight = new VerticalLayout();
+        verticalLayoutLeft.add(new H2("Details: " + omdbItem.getTitle()),
+                new Label("Release date: " + omdbItem.getReleased()),
+                new Label("Actors: " + omdbItem.getActors()),
+                new Label("Director: " + omdbItem.getDirector()),
+                new Label("Plot: " + omdbItem.getPlot()),
+                new Label("Imdb rating: " + omdbItem.getImdbRating()));
+        verticalLayoutRight.add(new Image(omdbItem.getPoster(), "movie poster"));
+        horizontalLayout.add(verticalLayoutLeft, verticalLayoutRight);
+        dialog.add(horizontalLayout);
+
+        return dialog;
     }
 
     private Label getLabelAppName() {

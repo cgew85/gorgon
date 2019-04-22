@@ -7,6 +7,7 @@ import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import io.github.cgew85.domain.Movie;
+import io.github.cgew85.domain.OmdbItem;
 import io.github.cgew85.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,10 @@ public class MovieService {
     public void deleteMovie(Movie movie) {
         requireNonNull(movie, "movie cannot be null");
         movieRepository.delete(movie);
+    }
+
+    public OmdbItem getOmdbItemByNameAndYear(String name, String year) {
+        return prepareOmdbClient().get(omdbService.getOmdbApiKey(), name, year);
     }
 
     private OmdbClient prepareOmdbClient() {
