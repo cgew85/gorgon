@@ -160,7 +160,7 @@ public class MovieUI extends VerticalLayout {
     private Button getButtonAddMovie() {
         if (isNull(buttonAddMovie)) {
             buttonAddMovie = new Button();
-            buttonAddMovie.setIcon(VaadinIcon.PLUS.create());
+            buttonAddMovie.setIcon(VaadinIcon.CHECK.create());
             buttonAddMovie.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_LARGE);
             buttonAddMovie.addClickListener(this::getClickListenerAdd);
         }
